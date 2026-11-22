@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Eyes on the Horizon Photo Album</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#14151a; --panel:#1d1f26; --text:#e6e3dc; --dim:#9a968c; --gold:#d8b45a; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.5 Inter, system-ui, sans-serif; }
+  header { text-align:center; padding:56px 16px 24px;
+           background:radial-gradient(ellipse at top, #3a2f1a 0%, transparent 70%); }
+  h1 { font-family:Cinzel, serif; color:var(--gold); font-size:clamp(28px,5vw,46px); margin:0 0 6px; letter-spacing:.04em; }
+  header p { color:var(--dim); margin:0; }
+  main { max-width:1400px; margin:0 auto; padding:0 16px 64px; }
+  h2 { font-family:Cinzel, serif; color:var(--gold); font-weight:600; font-size:20px;
+       border-bottom:1px solid #3a3528; padding-bottom:6px; margin:40px 0 16px; }
+  .wall { columns:4 280px; column-gap:14px; }
+  figure { break-inside:avoid; margin:0 0 14px; background:var(--panel); border-radius:10px; overflow:hidden;
+           cursor:zoom-in; transition:transform .15s; }
+  figure:hover { transform:translateY(-2px); }
+  figure img { width:100%; height:auto; display:block; background:#2a2c33; }
+  figcaption { padding:10px 12px 12px; }
+  .cap { margin:0 0 4px; }
+  .meta { color:var(--dim); font-size:13px; }
+  #box { position:fixed; inset:0; background:rgba(8,8,10,.94); display:none; flex-direction:column;
+         align-items:center; justify-content:center; padding:16px; z-index:10; }
+  #box.on { display:flex; }
+  #box img { max-width:100%; max-height:80vh; border-radius:6px; }
+  #box .txt { max-width:800px; text-align:center; margin-top:14px; }
+  #box a { color:var(--gold); }
+  .nav { position:fixed; top:50%; transform:translateY(-50%); background:none; border:0; color:#fff;
+         font-size:44px; cursor:pointer; padding:16px; opacity:.7; }
+  .nav:hover { opacity:1; } #prev { left:4px; } #next { right:4px; }
+  #close { position:fixed; top:8px; right:14px; background:none; border:0; color:#fff; font-size:34px; cursor:pointer; }
+  footer { text-align:center; color:var(--dim); font-size:13px; padding:24px; }
+</style>
+</head>
+<body>
+<header><h1>Eyes on the Horizon Photo Album</h1><p>0 photos · updated November 22, 2026</p></header>
+<main><p style='text-align:center;color:var(--dim)'>No photos yet.</p></main>
+<footer>Collected weekly from #group-pictures by The Horizon Herald</footer>
+<div id="box" role="dialog" aria-modal="true">
+  <button id="close" aria-label="Close">×</button>
+  <button class="nav" id="prev" aria-label="Previous">‹</button>
+  <img id="big" alt="">
+  <div class="txt"><p class="cap" id="bcap"></p><p class="meta" id="bmeta"></p></div>
+  <button class="nav" id="next" aria-label="Next">›</button>
+</div>
+<script>
+  const figs = [...document.querySelectorAll("figure")];
+  const box = document.getElementById("box"), big = document.getElementById("big");
+  let cur = 0;
+  function show(i) {
+    cur = (i + figs.length) % figs.length;
+    const f = figs[cur];
+    big.src = f.dataset.full;
+    big.alt = f.dataset.cap || "Guild photo";
+    document.getElementById("bcap").textContent = f.dataset.cap;
+    document.getElementById("bmeta").innerHTML = f.querySelector(".meta").innerHTML +
+      ' · <a href="' + f.dataset.link + '" target="_blank" rel="noopener">view in Discord</a>';
+    box.classList.add("on");
+  }
+  figs.forEach((f, i) => f.addEventListener("click", () => show(i)));
+  document.getElementById("close").onclick = () => box.classList.remove("on");
+  document.getElementById("prev").onclick = e => { e.stopPropagation(); show(cur - 1); };
+  document.getElementById("next").onclick = e => { e.stopPropagation(); show(cur + 1); };
+  box.addEventListener("click", e => { if (e.target === box) box.classList.remove("on"); });
+  document.addEventListener("keydown", e => {
+    if (!box.classList.contains("on")) return;
+    if (e.key === "Escape") box.classList.remove("on");
+    if (e.key === "ArrowLeft") show(cur - 1);
+    if (e.key === "ArrowRight") show(cur + 1);
+  });
+  let x0 = null;
+  box.addEventListener("touchstart", e => x0 = e.touches[0].clientX);
+  box.addEventListener("touchend", e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 50) show(cur + (dx < 0 ? 1 : -1));
+    x0 = null;
+  });
+</script>
+</body>
+</html>
